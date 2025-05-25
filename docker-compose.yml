@@ -1,0 +1,28 @@
+version: "3"
+
+services:
+    ubuntu:
+        build: .
+        stdin_open: true
+        tty: true
+        volumes:
+            - ./tests:/home/selenium/tests
+        links:
+            - selenium
+            - novnc
+
+    novnc:
+        image: javanile/novnc
+        environment:
+            - REMOTE_HOST=localhost
+            - REMOTE_PORT=5900
+        ports:
+            - "8081:8081"
+        links:
+            - selenium
+
+    selenium:
+        image: selenium/standalone-chrome:latest
+        shm_size: 2g
+        ports:
+            - "4444:4444"
