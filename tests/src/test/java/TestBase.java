@@ -3,16 +3,14 @@ import java.net.URL;
 
 import org.junit.After;
 import org.junit.Before;
+import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
-
-import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
-
 
 public class TestBase {
 
@@ -31,41 +29,43 @@ public class TestBase {
         System.out.println("Navigating to the login page...");
         driver.get("https://app.wieldy.hu/hu/login");
 
-        try {
-            System.out.println("Checking for cookie consent popup...");
-            WebElement cookieButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("onetrust-accept-btn-handler")));
-            cookieButton.click();
-            System.out.println("Cookie consent accepted.");
-        } catch (TimeoutException e) {
-            System.out.println("No cookie consent popup found.");
-        }
+        handleCookieConsent();
 
         try {
-            System.out.println("Locating username field...");
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email_input"))).sendKeys("liszkai.dorka@agilexpert.hu");
+            WebElement emailField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("email_input")));
+            emailField.sendKeys("liszkai.dorka@agilexpert.hu");
             System.out.println("Username entered.");
 
-            System.out.println("Locating password field...");
-            wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password_input"))).sendKeys("Kiskutya22.");
+            WebElement passwordField = wait.until(ExpectedConditions.visibilityOfElementLocated(By.id("password_input")));
+            passwordField.sendKeys("Kiskutya22.");
             System.out.println("Password entered.");
 
-            System.out.println("Locating login button...");
-            WebElement loginBtn = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='button']")));
+            WebElement loginButton = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[type='button']")));
+
             try {
-                loginBtn.click();
+                loginButton.click();
                 System.out.println("Login button clicked.");
-            } catch (Exception clickException) {
+            } catch (Exception e) {
                 System.out.println("Standard click failed, attempting JavaScript click...");
-                ((RemoteWebDriver) driver).executeScript("arguments[0].click();", loginBtn);
+                ((RemoteWebDriver) driver).executeScript("arguments[0].click();", loginButton);
                 System.out.println("Login button clicked via JavaScript.");
             }
-            
 
             System.out.println("Login successful.");
 
         } catch (Exception e) {
             System.out.println("An error occurred during the login process: " + e.getMessage());
             throw e;
+        }
+    }
+
+    private void handleCookieConsent() {
+        try {
+            WebElement cookieButton = wait.until(ExpectedConditions.elementToBeClickable(By.id("onetrust-accept-btn-handler")));
+            cookieButton.click();
+            System.out.println("Cookie consent accepted.");
+        } catch (TimeoutException e) {
+            System.out.println("No cookie consent popup found.");
         }
     }
 
